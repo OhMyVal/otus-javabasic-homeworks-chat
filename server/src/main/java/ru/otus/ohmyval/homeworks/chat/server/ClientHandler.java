@@ -14,6 +14,10 @@ public class ClientHandler {
 
     private static int usersCounter = 0;
 
+    public String getUsername() {
+        return username;
+    }
+
     private void generateUsername() {
         usersCounter++;
         this.username = "user" + usersCounter;
@@ -34,6 +38,12 @@ public class ClientHandler {
                         if (msg.startsWith("/exit")) {
                             disconnect();
                             break;
+                        }
+                        if (msg.startsWith("/w")) {
+                            String[] parts = msg.split(" ", 3);
+                            String targetName = parts[1];
+                            String targetMessage = parts[2];
+                            server.sendPrivateMessage(this, targetName, targetMessage);
                         }
                         continue;
                     }
