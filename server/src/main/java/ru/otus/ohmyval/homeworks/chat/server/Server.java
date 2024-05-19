@@ -40,4 +40,15 @@ public class Server {
             c.sendMessage(message);
         }
     }
+
+    public synchronized void sendPrivateMessage(ClientHandler sender, String receiverName, String message) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equalsIgnoreCase(receiverName)) {
+                c.sendMessage(sender.getUsername() + ": " + message);
+                return;
+            }
+        }
+        System.out.println("Пользователя с таким именем нет");
+    }
 }
+
