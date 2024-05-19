@@ -41,9 +41,9 @@ public class ClientHandler {
                         }
                         if (msg.startsWith("/w")) {
                             String[] parts = msg.split(" ", 3);
-                            String targetName = parts[1];
+                            String receiverName = parts[1];
                             String targetMessage = parts[2];
-                            server.sendPrivateMessage(this, targetName, targetMessage);
+                            server.sendPrivateMessage(this, receiverName, targetMessage);
                         }
                         continue;
                     }

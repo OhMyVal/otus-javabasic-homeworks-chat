@@ -41,10 +41,10 @@ public class Server {
         }
     }
 
-    public synchronized void sendPrivateMessage(ClientHandler clientHandler,String name, String message) {
+    public synchronized void sendPrivateMessage(ClientHandler sender, String receiverName, String message) {
         for (ClientHandler c : clients) {
-            if (c.getUsername().equalsIgnoreCase(name)) {
-                c.sendMessage(clientHandler.getUsername() + ": " + message);
+            if (c.getUsername().equalsIgnoreCase(receiverName)) {
+                c.sendMessage(sender.getUsername() + ": " + message);
                 return;
             }
         }
