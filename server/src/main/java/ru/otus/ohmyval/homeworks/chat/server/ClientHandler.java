@@ -36,10 +36,9 @@ public class ClientHandler {
                     String msg = in.readUTF();
                     if (msg.startsWith("/")) {
                         if (msg.startsWith("/exit")) {
-                            disconnect();
                             break;
                         }
-                        if (msg.startsWith("/w")) {
+                        if (msg.startsWith("/w ")) {
                             String[] parts = msg.split(" ", 3);
                             String receiverName = parts[1];
                             String targetMessage = parts[2];
