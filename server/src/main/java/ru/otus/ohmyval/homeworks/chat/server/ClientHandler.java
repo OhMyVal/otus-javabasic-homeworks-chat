@@ -10,6 +10,7 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+
     private String username;
 
     private static int usersCounter = 0;
