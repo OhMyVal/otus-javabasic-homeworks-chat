@@ -3,7 +3,7 @@ package ru.otus.ohmyval.homeworks.chat.server;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryAuthenticationService implements AuthenticationService{
+public class InMemoryAuthenticationService implements AuthenticationService {
     private class User {
         private String login;
         private String password;
@@ -33,8 +33,9 @@ public class InMemoryAuthenticationService implements AuthenticationService{
         for (int i = 1; i <= 10; i++) {
             this.users.add(new User("login" + i, "pass" + i, "nick" + i, Role.USER));
         }
+        users.get(0).setRole(Role.ADMIN);
         users.get(1).setRole(Role.ADMIN);
-        users.get(2).setRole(Role.ADMIN);
+
     }
 
     @Override
@@ -73,6 +74,17 @@ public class InMemoryAuthenticationService implements AuthenticationService{
     public boolean isNicknameAlreadyExist(String nickname) {
         for (User u : users) {
             if (u.nickname.equals(nickname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isUserRoleAdmin(ClientHandler clientHandler) {
+        String senderNickname = clientHandler.getNickname();
+        for (User u : users) {
+            if (u.nickname.equals(senderNickname) && u.role.equals(Role.ADMIN)) {
                 return true;
             }
         }

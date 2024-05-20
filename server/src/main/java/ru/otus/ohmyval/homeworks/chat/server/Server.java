@@ -48,6 +48,23 @@ public class Server {
         broadcastMessage("Из чата вышел " + clientHandler.getNickname());
     }
 
+    public synchronized void unsubscribe(String nickname) {
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equalsIgnoreCase(nickname)) {
+                clients.remove(c);
+                broadcastMessage("Администратором из чата удален " + c.getNickname());
+                return;
+            }
+//        for (int i = 0; i < clients.size(); i++) {
+//            if (clients.get(i).getNickname().equalsIgnoreCase(nickname)) {
+//                clients.remove(i);
+//                broadcastMessage("Администратором из чата удален " + clients.get(i).getNickname());
+//                return;
+//            }
+//        }
+        }
+    }
+
     public synchronized void broadcastMessage(String message) {
         for (ClientHandler c : clients) {
             c.sendMessage(message);
