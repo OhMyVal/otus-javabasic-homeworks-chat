@@ -53,16 +53,16 @@ public class Server {
             c.sendMessage(message);
         }
     }
-// поменять
-//    public synchronized void sendPrivateMessage(ClientHandler sender, String receiverName, String message) {
-//        for (ClientHandler c : clients) {
-//            if (c.getUsername().equalsIgnoreCase(receiverName)) {
-//                c.sendMessage(sender.getUsername() + ": " + message);
-//                return;
-//            }
-//        }
-//        System.out.println("Пользователя с таким именем нет");
-//    }
+
+    public synchronized void sendPrivateMessage(ClientHandler sender, String receiverName, String message) {
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equalsIgnoreCase(receiverName)) {
+                c.sendMessage(sender.getNickname() + ": " + message);
+                return;
+            }
+        }
+        System.out.println("Пользователя с таким именем нет");
+    }
 
     public synchronized boolean isNicknameBusy(String nickname) {
         for (ClientHandler c : clients) {

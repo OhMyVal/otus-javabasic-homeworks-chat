@@ -10,56 +10,6 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
-
-    // поменять
-//    private String username;
-//
-//    private static int usersCounter = 0;
-//
-//    public String getUsername() {
-//        return username;
-//    }
-//
-//    private void generateUsername() {
-//        usersCounter++;
-//        this.username = "user" + usersCounter;
-//    }
-//
-//    public ClientHandler(Server server, Socket socket) throws IOException {
-//        this.server = server;
-//        this.socket = socket;
-//        this.in = new DataInputStream(socket.getInputStream());
-//        this.out = new DataOutputStream(socket.getOutputStream());
-//        this.generateUsername();
-//        new Thread(() -> {
-//            try {
-//                System.out.println("Подключился новый клиент");
-//                while (true) {
-//                    String msg = in.readUTF();
-//                    if (msg.startsWith("/")) {
-//                        if (msg.startsWith("/exit")) {
-//                            disconnect();
-//                            break;
-//                        }
-//                        if (msg.startsWith("/w")) {
-//                            String[] parts = msg.split(" ", 3);
-//                            String receiverName = parts[1];
-//                            String targetMessage = parts[2];
-//                            server.sendPrivateMessage(this, receiverName, targetMessage);
-//                        }
-//                        continue;
-//                    }
-//                    server.broadcastMessage(username + ": " + msg);
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } finally {
-//                disconnect();
-//            }
-//        }).start();
-//    }
-// поменять
-
     private String nickname;
 
     public String getNickname() {
@@ -92,9 +42,16 @@ public class ClientHandler {
                 if (msg.startsWith("/exit")) {
                     break;
                 }
-//                if (msg.startsWith("/w ")) {
-//                    String[] tokens = msg.split(" ", 3);
-//                }
+                if (msg.startsWith("/w ")) {
+                    String[] parts = msg.split(" ", 3);
+                    if (parts.length != 3) {
+                        sendMessage("Некорректный формат запроса");
+                        continue;
+                    }
+                    String receiverName = parts[1];
+                    String targetMessage = parts[2];
+                    server.sendPrivateMessage(this, receiverName, targetMessage);
+                }
                 continue;
             }
             server.broadcastMessage(nickname + ": " + msg);
@@ -126,7 +83,6 @@ public class ClientHandler {
                 sendMessage(nickname + ", добро пожаловать в чат!");
                 return true;
             } else if (msg.startsWith("/register ")) {
-                // /register login pass nickname
                 String[] tokens = msg.split(" ");
                 if (tokens.length != 4) {
                     sendMessage("Некорректный формат запроса");
