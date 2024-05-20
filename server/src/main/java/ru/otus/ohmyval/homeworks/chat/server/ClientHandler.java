@@ -12,7 +12,6 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickname;
 
-//    private AuthenticationService authenticationService;
 
     public String getNickname() {
         return nickname;
@@ -62,13 +61,12 @@ public class ClientHandler {
                         }
                         if (server.getAuthenticationService().isUserRoleAdmin(this)) {
                             String deletedNickname = parts[1];
-                            server.unsubscribe(deletedNickname);
+                            server.kick(deletedNickname);
                         } else {
                             sendMessage("Недостаточно прав доступа");
                         }
                         continue;
                     }
-
                 }
                 continue;
             }

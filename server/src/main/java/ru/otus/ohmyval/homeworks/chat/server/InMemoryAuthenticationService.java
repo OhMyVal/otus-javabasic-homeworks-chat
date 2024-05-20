@@ -10,10 +10,6 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         private String nickname;
         private Role role;
 
-        public Role getRole() {
-            return role;
-        }
-
         private void setRole(Role role) {
             this.role = role;
         }
