@@ -12,6 +12,7 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickname;
 
+
     public String getNickname() {
         return nickname;
     }
@@ -51,6 +52,21 @@ public class ClientHandler {
                     String receiverName = parts[1];
                     String targetMessage = parts[2];
                     server.sendPrivateMessage(this, receiverName, targetMessage);
+                } else {
+                    if (msg.startsWith("/kick ")) {
+                        String[] parts = msg.split(" ", 2);
+                        if (parts.length != 2) {
+                            sendMessage("Некорректный формат запроса");
+                            continue;
+                        }
+                        if (server.getAuthenticationService().isUserRoleAdmin(this)) {
+                            String deletedNickname = parts[1];
+                            server.kick(deletedNickname);
+                        } else {
+                            sendMessage("Недостаточно прав доступа");
+                        }
+                        continue;
+                    }
                 }
                 continue;
             }
@@ -99,7 +115,7 @@ public class ClientHandler {
                     sendMessage("Указанный никнейм уже занят");
                     continue;
                 }
-                if (!server.getAuthenticationService().register(login, password, nickname)) {
+                if (!server.getAuthenticationService().register(login, password, nickname, Role.USER)) {
                     sendMessage("Не удалось пройти регистрацию");
                     continue;
                 }
