@@ -44,8 +44,9 @@ public class Server {
     }
 
     public synchronized void unsubscribe(ClientHandler clientHandler) {
-        clients.remove(clientHandler);
-        broadcastMessage("Из чата вышел " + clientHandler.getNickname());
+        if (clients.remove(clientHandler)) {
+            broadcastMessage("Из чата вышел " + clientHandler.getNickname());
+        }
     }
 
     public synchronized void kick(String nickname) {
