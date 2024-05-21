@@ -147,10 +147,10 @@ public class ClientHandler {
     }
 
     private void adminCommands(String msg) {
-        if (msg.startsWith("/shutdown")) {
-
-            return;
-        }
+//        if (msg.startsWith("/shutdown")) {
+//            server.serverShutdown();
+//            return;
+//        }
         String[] parts = msg.split(" ", 2);
         if (parts.length != 2) {
             sendMessage("Некорректный формат запроса");
