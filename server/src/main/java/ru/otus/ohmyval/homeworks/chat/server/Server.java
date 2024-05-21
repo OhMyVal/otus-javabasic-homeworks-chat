@@ -49,9 +49,9 @@ public class Server {
         }
     }
 
-    public synchronized void kick(String nickname) {
+    public synchronized void kick(String deletedNickname) {
         for (ClientHandler c : clients) {
-            if (c.getNickname().equalsIgnoreCase(nickname)) {
+            if (c.getNickname().equalsIgnoreCase(deletedNickname)) {
                 c.disconnect();
                 return;
             }
@@ -68,10 +68,11 @@ public class Server {
         for (ClientHandler c : clients) {
             if (c.getNickname().equalsIgnoreCase(receiverName)) {
                 c.sendMessage(sender.getNickname() + ": " + message);
+                sender.sendMessage(sender.getNickname() + ": " + message);
                 return;
             }
         }
-        System.out.println("Пользователя с таким именем нет");
+        sender.sendMessage("Пользователя с таким именем нет");
     }
 
     public synchronized boolean isNicknameBusy(String nickname) {
