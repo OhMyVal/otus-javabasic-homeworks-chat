@@ -10,6 +10,10 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         private String nickname;
         private Role role;
 
+        private void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
         private void setRole(Role role) {
             this.role = role;
         }
@@ -69,7 +73,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     @Override
     public boolean isNicknameAlreadyExist(String nickname) {
         for (User u : users) {
-            if (u.nickname.equals(nickname)) {
+            if (u.nickname.equalsIgnoreCase(nickname)) {
                 return true;
             }
         }
@@ -81,6 +85,17 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         String senderNickname = clientHandler.getNickname();
         for (User u : users) {
             if (u.nickname.equals(senderNickname) && u.role.equals(Role.ADMIN)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean changeNickname(ClientHandler clientHandler, String newNickname) {
+        for (User u : users) {
+            if (u.nickname.equals(clientHandler.getNickname())) {
+                u.setNickname(newNickname);
                 return true;
             }
         }

@@ -76,7 +76,7 @@ public class Server {
 
     public synchronized boolean isNicknameBusy(String nickname) {
         for (ClientHandler c : clients) {
-            if (c.getNickname().equals(nickname)) {
+            if (c.getNickname().equalsIgnoreCase(nickname)) {
                 return true;
             }
         }

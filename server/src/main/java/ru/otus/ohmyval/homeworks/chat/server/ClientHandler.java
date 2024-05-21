@@ -52,26 +52,46 @@ public class ClientHandler {
                     String receiverName = parts[1];
                     String targetMessage = parts[2];
                     server.sendPrivateMessage(this, receiverName, targetMessage);
-                } else {
-                    if (msg.startsWith("/kick ")) {
-                        String[] parts = msg.split(" ", 2);
-                        if (parts.length != 2) {
-                            sendMessage("Некорректный формат запроса");
-                            continue;
-                        }
-                        if (server.getAuthenticationService().isUserRoleAdmin(this)) {
-                            String deletedNickname = parts[1];
-                            server.kick(deletedNickname);
-                        } else {
-                            sendMessage("Недостаточно прав доступа");
-                        }
+                    continue;
+                }
+                if (msg.startsWith("/changenick ")) {
+                    String[] parts = msg.split(" ", 2);
+                    if (parts.length != 2) {
+                        sendMessage("Некорректный формат запроса");
                         continue;
                     }
+                    String newNickname = parts[1];
+                    if (server.getAuthenticationService().isNicknameAlreadyExist(newNickname)) {
+                        sendMessage("Указанный никнейм уже занят");
+                        continue;
+                    }
+                    if (server.getAuthenticationService().changeNickname(this, newNickname)) {
+                        server.broadcastMessage(nickname + " изменил никнейм на " + newNickname);
+                        this.nickname = newNickname;
+                        continue;
+                    } else {
+                        sendMessage("Не удалось сменить никнейм");
+                    }
+                    continue;
                 }
-                continue;
+                if (msg.startsWith("/kick ")) {
+                    String[] parts = msg.split(" ", 2);
+                    if (parts.length != 2) {
+                        sendMessage("Некорректный формат запроса");
+                        continue;
+                    }
+                    if (server.getAuthenticationService().isUserRoleAdmin(this)) {
+                        String deletedNickname = parts[1];
+                        server.kick(deletedNickname);
+                    } else {
+                        sendMessage("Недостаточно прав доступа");
+                    }
+                    continue;
+                }
             }
             server.broadcastMessage(nickname + ": " + msg);
         }
+
     }
 
     private boolean tryToAuthenticate() throws IOException {

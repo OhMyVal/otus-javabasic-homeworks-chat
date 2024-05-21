@@ -6,4 +6,5 @@ public interface AuthenticationService {
     boolean isLoginAlreadyExist(String login);
     boolean isNicknameAlreadyExist(String nickname);
     boolean isUserRoleAdmin(ClientHandler clientHandler);
+    boolean changeNickname(ClientHandler clientHandler, String newNickname);
 }
