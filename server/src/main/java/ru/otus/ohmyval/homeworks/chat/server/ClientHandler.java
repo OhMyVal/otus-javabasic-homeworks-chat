@@ -96,7 +96,13 @@ public class ClientHandler {
 
     private void communicate() throws IOException {
         while (true) {
+            long time1 = System.currentTimeMillis();
             String msg = in.readUTF();
+            long time2 = System.currentTimeMillis();
+            if ((int)(time2 - time1)/1000 > 120){
+                disconnect();
+                break;
+            }
             if (msg.startsWith("/exit")) {
                 break;
             }

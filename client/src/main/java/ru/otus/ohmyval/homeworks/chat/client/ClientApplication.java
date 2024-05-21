@@ -19,10 +19,10 @@ public class ClientApplication {
             System.out.println("Подключились к серверу");
             new Thread(() -> {
                 try {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm:ss");
-                    String time = simpleDateFormat.format(new Date());
                     while (true) {
                         String inMessage = in.readUTF();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm:ss");
+                        String time = simpleDateFormat.format(new Date());
                         System.out.println(inMessage + " " + time);
                     }
                 } catch (IOException e) {
