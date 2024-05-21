@@ -49,13 +49,14 @@ public class Server {
         }
     }
 
-    public synchronized void kick(String deletedNickname) {
+    public synchronized boolean kick(String deletedNickname) {
         for (ClientHandler c : clients) {
             if (c.getNickname().equalsIgnoreCase(deletedNickname)) {
                 c.disconnect();
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public synchronized void broadcastMessage(String message) {

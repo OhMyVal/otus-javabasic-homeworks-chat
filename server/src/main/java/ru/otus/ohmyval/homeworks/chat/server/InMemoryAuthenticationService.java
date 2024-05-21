@@ -27,8 +27,10 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     private List<User> users;
+    private List<User> banUsers;
 
     public InMemoryAuthenticationService() {
+        this.banUsers = new ArrayList<>();
         this.users = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             this.users.add(new User("login" + i, "pass" + i, "nick" + i, Role.USER));
@@ -92,10 +94,32 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public boolean changeNickname(ClientHandler clientHandler, String newNickname) {
+    public synchronized boolean changeNickname(ClientHandler clientHandler, String newNickname) {
         for (User u : users) {
             if (u.nickname.equals(clientHandler.getNickname())) {
                 u.setNickname(newNickname);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public synchronized boolean addToBan(String banNickname) {
+        for (User u : users) {
+            if (u.nickname.equalsIgnoreCase(banNickname) && !banUsers.contains(u)) {
+                banUsers.add(u);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public synchronized boolean removeFromBan(String banNickname) {
+        for (User u : users) {
+            if (u.nickname.equalsIgnoreCase(banNickname) && banUsers.contains(u)) {
+                banUsers.remove(u);
                 return true;
             }
         }

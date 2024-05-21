@@ -147,14 +147,29 @@ public class ClientHandler {
     }
 
     private void adminCommands(String msg) {
+        if (msg.startsWith("/shutdown")) {
+
+            return;
+        }
+        String[] parts = msg.split(" ", 2);
+        if (parts.length != 2) {
+            sendMessage("Некорректный формат запроса");
+            return;
+        }
         if (msg.startsWith("/kick ")) {
-            String[] parts = msg.split(" ", 2);
-            if (parts.length != 2) {
-                sendMessage("Некорректный формат запроса");
-                return;
-            }
             String deletedNickname = parts[1];
-            server.kick(deletedNickname);
+            if (!server.kick(deletedNickname)) {
+                sendMessage("Не удалось удалить пользователя");
+            }
+            return;
+        }
+        if (msg.startsWith("/ban ")) {
+            String banNickname = parts[1];
+            if (server.getAuthenticationService().addToBan(banNickname)) {
+                server.kick(banNickname);
+            } else {
+                sendMessage("Не удалось забанить пользователя");
+            }
         }
     }
 
