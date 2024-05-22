@@ -116,10 +116,19 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public synchronized boolean removeFromBan(String banNickname) {
+    public synchronized void removeFromBan(String banNickname) {
         for (User u : users) {
             if (u.nickname.equalsIgnoreCase(banNickname) && banUsers.contains(u)) {
                 banUsers.remove(u);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public boolean isNicknameInBan(String banNickname) {
+        for (User u : banUsers) {
+            if (u.nickname.equalsIgnoreCase(banNickname)) {
                 return true;
             }
         }

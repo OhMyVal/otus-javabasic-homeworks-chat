@@ -36,64 +36,6 @@ public class ClientHandler {
         }).start();
     }
 
-//    private void communicate() throws IOException {
-//        while (true) {
-//            String msg = in.readUTF();
-//            if (msg.startsWith("/exit")) {
-//                break;
-//            }
-//            if (msg.startsWith("/")) {
-//                if (msg.startsWith("/w ")) {
-//                    String[] parts = msg.split(" ", 3);
-//                    if (parts.length != 3) {
-//                        sendMessage("Некорректный формат запроса");
-//                        continue;
-//                    }
-//                    String receiverName = parts[1];
-//                    String targetMessage = parts[2];
-//                    server.sendPrivateMessage(this, receiverName, targetMessage);
-//                    continue;
-//                }
-//                if (msg.startsWith("/changenick ")) {
-//                    String[] parts = msg.split(" ", 2);
-//                    if (parts.length != 2) {
-//                        sendMessage("Некорректный формат запроса");
-//                        continue;
-//                    }
-//                    String newNickname = parts[1];
-//                    if (server.getAuthenticationService().isNicknameAlreadyExist(newNickname)) {
-//                        sendMessage("Указанный никнейм уже занят");
-//                        continue;
-//                    }
-//                    if (server.getAuthenticationService().changeNickname(this, newNickname)) {
-//                        server.broadcastMessage(nickname + " изменил никнейм на " + newNickname);
-//                        this.nickname = newNickname;
-//                        continue;
-//                    } else {
-//                        sendMessage("Не удалось сменить никнейм");
-//                    }
-//                    continue;
-//                }
-//                if (msg.startsWith("/kick ")) {
-//                    String[] parts = msg.split(" ", 2);
-//                    if (parts.length != 2) {
-//                        sendMessage("Некорректный формат запроса");
-//                        continue;
-//                    }
-//                    if (server.getAuthenticationService().isUserRoleAdmin(this)) {
-//                        String deletedNickname = parts[1];
-//                        server.kick(deletedNickname);
-//                    } else {
-//                        sendMessage("Недостаточно прав доступа");
-//                    }
-//                    continue;
-//                }
-//            }
-//            server.broadcastMessage(nickname + ": " + msg);
-//        }
-//
-//    }
-
     private void communicate() throws IOException {
         while (true) {
             long time1 = System.currentTimeMillis();
@@ -182,6 +124,7 @@ public class ClientHandler {
 
     private boolean tryToAuthenticate() throws IOException {
         while (true) {
+            long time1 = System.currentTimeMillis();
             String msg = in.readUTF();
             if (msg.startsWith("/auth ")) {
                 String[] tokens = msg.split(" ");
@@ -199,6 +142,16 @@ public class ClientHandler {
                 if (server.isNicknameBusy(nickname)) {
                     sendMessage("Указанная учетная запись уже занята. Попробуйте зайти позднее");
                     continue;
+                }
+
+                if (server.getAuthenticationService().isNicknameInBan(nickname)){
+                    long time2 = System.currentTimeMillis();
+                    if ((int)(time2 - time1)/1000 < 120){
+                        sendMessage("Указанная учетная запись забанена, повторите попытку позже");
+                        continue;
+                    }else {
+                        server.getAuthenticationService().removeFromBan(nickname);
+                    }
                 }
                 this.nickname = nickname;
                 server.subscribe(this);

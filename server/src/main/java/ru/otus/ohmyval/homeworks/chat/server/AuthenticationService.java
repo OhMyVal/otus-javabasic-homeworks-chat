@@ -8,5 +8,6 @@ public interface AuthenticationService {
     boolean isUserRoleAdmin(ClientHandler clientHandler);
     boolean changeNickname(ClientHandler clientHandler, String newNickname);
     boolean addToBan(String banNickname);
-    boolean removeFromBan(String banNickname);
+    void removeFromBan(String banNickname);
+    boolean isNicknameInBan(String banNickname);
 }
