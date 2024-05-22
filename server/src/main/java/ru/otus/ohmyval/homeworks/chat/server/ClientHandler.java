@@ -12,6 +12,17 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickname;
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public DataInputStream getIn() {
+        return in;
+    }
+
+    public DataOutputStream getOut() {
+        return out;
+    }
 
     public String getNickname() {
         return nickname;
@@ -86,6 +97,10 @@ public class ClientHandler {
             } else {
                 sendMessage("Не удалось сменить никнейм");
             }
+        }
+        if (msg.startsWith("/activelist")) {
+            sendMessage("Подключенные пользователи: " + server.activeClients());
+            return;
         }
         if (server.getAuthenticationService().isUserRoleAdmin(this)) {
             adminCommands(msg);

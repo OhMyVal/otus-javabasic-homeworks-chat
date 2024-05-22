@@ -88,6 +88,16 @@ public class Server {
         return false;
     }
 
+    public synchronized List<String> activeClients() {
+        List<String> activeClientsList = new ArrayList<>();
+        for (ClientHandler c : clients) {
+            if (c.getSocket() != null && !c.getSocket().isClosed() && c.getIn() != null && c.getOut() != null) {
+                activeClientsList.add(c.getNickname());
+            }
+        }
+        return activeClientsList;
+    }
+
 //    public void serverShutdown() {
 //        try {
 //            serverSocket.close();
