@@ -41,7 +41,7 @@ public class ClientHandler {
             long time1 = System.currentTimeMillis();
             String msg = in.readUTF();
             long time2 = System.currentTimeMillis();
-            if ((int)(time2 - time1)/1000 > 120){
+            if ((int) (time2 - time1) / 1000 > 120) {
                 disconnect();
                 break;
             }
@@ -113,7 +113,15 @@ public class ClientHandler {
         }
         if (msg.startsWith("/ban ")) {
             String banNickname = parts[1];
-            if (server.getAuthenticationService().addToBan(banNickname)) {
+            if (server.getAuthenticationService().addToTempBan(banNickname)) {
+                server.kick(banNickname);
+            } else {
+                sendMessage("Не удалось забанить пользователя");
+            }
+        }
+        if (msg.startsWith("/banpermanent ")) {
+            String banNickname = parts[1];
+            if (server.getAuthenticationService().addToPermBan(banNickname)) {
                 server.kick(banNickname);
             } else {
                 sendMessage("Не удалось забанить пользователя");
@@ -143,14 +151,17 @@ public class ClientHandler {
                     sendMessage("Указанная учетная запись уже занята. Попробуйте зайти позднее");
                     continue;
                 }
-
-                if (server.getAuthenticationService().isNicknameInBan(nickname)){
+                if (server.getAuthenticationService().isNicknameInPermBan(nickname)) {
+                    sendMessage("Указанная учетная запись забанена навсегда");
+                    continue;
+                }
+                if (server.getAuthenticationService().isNicknameInTempBan(nickname)) {
                     long time2 = System.currentTimeMillis();
-                    if ((int)(time2 - time1)/1000 < 120){
+                    if ((int) (time2 - time1) / 1000 < 120) {
                         sendMessage("Указанная учетная запись забанена, повторите попытку позже");
                         continue;
-                    }else {
-                        server.getAuthenticationService().removeFromBan(nickname);
+                    } else {
+                        server.getAuthenticationService().removeFromTempBan(nickname);
                     }
                 }
                 this.nickname = nickname;

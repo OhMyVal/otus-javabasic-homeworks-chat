@@ -27,10 +27,12 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     private List<User> users;
-    private List<User> banUsers;
+    private List<User> tempBanUsers;
+    private List<User> permBanUsers;
 
     public InMemoryAuthenticationService() {
-        this.banUsers = new ArrayList<>();
+        this.tempBanUsers = new ArrayList<>();
+        this.permBanUsers = new ArrayList<>();
         this.users = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             this.users.add(new User("login" + i, "pass" + i, "nick" + i, Role.USER));
@@ -105,10 +107,11 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public synchronized boolean addToBan(String banNickname) {
+    public synchronized boolean addToTempBan(String banNickname) {
         for (User u : users) {
-            if (u.nickname.equalsIgnoreCase(banNickname) && !banUsers.contains(u)) {
-                banUsers.add(u);
+            if (u.nickname.equalsIgnoreCase(banNickname) && !tempBanUsers.contains(u)) {
+                tempBanUsers.add(u);
+
                 return true;
             }
         }
@@ -116,18 +119,39 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public synchronized void removeFromBan(String banNickname) {
+    public synchronized void removeFromTempBan(String banNickname) {
         for (User u : users) {
-            if (u.nickname.equalsIgnoreCase(banNickname) && banUsers.contains(u)) {
-                banUsers.remove(u);
+            if (u.nickname.equalsIgnoreCase(banNickname) && tempBanUsers.contains(u)) {
+                tempBanUsers.remove(u);
                 return;
             }
         }
     }
 
     @Override
-    public boolean isNicknameInBan(String banNickname) {
-        for (User u : banUsers) {
+    public boolean addToPermBan(String banNickname) {
+        for (User u : users) {
+            if (u.nickname.equalsIgnoreCase(banNickname) && !permBanUsers.contains(u)) {
+                permBanUsers.add(u);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isNicknameInTempBan(String banNickname) {
+        for (User u : tempBanUsers) {
+            if (u.nickname.equalsIgnoreCase(banNickname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isNicknameInPermBan(String banNickname) {
+        for (User u : permBanUsers) {
             if (u.nickname.equalsIgnoreCase(banNickname)) {
                 return true;
             }

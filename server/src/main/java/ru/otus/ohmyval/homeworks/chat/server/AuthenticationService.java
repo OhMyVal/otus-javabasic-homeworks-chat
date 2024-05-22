@@ -7,7 +7,9 @@ public interface AuthenticationService {
     boolean isNicknameAlreadyExist(String nickname);
     boolean isUserRoleAdmin(ClientHandler clientHandler);
     boolean changeNickname(ClientHandler clientHandler, String newNickname);
-    boolean addToBan(String banNickname);
-    void removeFromBan(String banNickname);
-    boolean isNicknameInBan(String banNickname);
+    boolean addToTempBan(String banNickname);
+    void removeFromTempBan(String banNickname);
+    boolean addToPermBan(String banNickname);
+    boolean isNicknameInTempBan(String banNickname);
+    boolean isNicknameInPermBan(String banNickname);
 }

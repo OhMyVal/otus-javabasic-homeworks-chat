@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Server {
     private int port;
-//    ServerSocket serverSocket;
+    //    ServerSocket serverSocket;
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
 
@@ -54,6 +54,7 @@ public class Server {
     public synchronized boolean kick(String deletedNickname) {
         for (ClientHandler c : clients) {
             if (c.getNickname().equalsIgnoreCase(deletedNickname)) {
+                c.sendMessage("Вы удалены из чата");
                 c.disconnect();
                 return true;
             }
