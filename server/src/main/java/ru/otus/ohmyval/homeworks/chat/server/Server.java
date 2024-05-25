@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Server {
     private int port;
-    //    ServerSocket serverSocket;
+    private ServerSocket serverSocket;
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
 
@@ -23,7 +23,7 @@ public class Server {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-//            this.serverSocket = serverSocket;
+            this.serverSocket = serverSocket;
             this.authenticationService = new InMemoryAuthenticationService();
             System.out.println("Сервис аутентификации запущен: " + authenticationService.getClass().getSimpleName());
             System.out.printf("Сервер запущен на порту: %d, ожидаем подключения клиентов\n", port);
@@ -98,12 +98,18 @@ public class Server {
         return activeClientsList;
     }
 
-//    public void serverShutdown() {
-//        try {
-//            serverSocket.close();
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
-//    }
+    public synchronized void shutdown() {
+        for (int i = clients.size() - 1; i >= 0; i--) {
+            clients.get(i).disconnect();
+        }
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }
+
 
