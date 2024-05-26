@@ -11,6 +11,7 @@ public class Server {
     private ServerSocket serverSocket;
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
+    private boolean isActive = true;
 
     public AuthenticationService getAuthenticationService() {
         return authenticationService;
@@ -27,7 +28,7 @@ public class Server {
             this.authenticationService = new InMemoryAuthenticationService();
             System.out.println("Сервис аутентификации запущен: " + authenticationService.getClass().getSimpleName());
             System.out.printf("Сервер запущен на порту: %d, ожидаем подключения клиентов\n", port);
-            while (true) {
+            while (isActive) {
                 try {
                     Socket socket = serverSocket.accept();
                     new ClientHandler(this, socket);
@@ -99,6 +100,7 @@ public class Server {
     }
 
     public synchronized void shutdown() {
+        isActive = false;
         for (int i = clients.size() - 1; i >= 0; i--) {
             clients.get(i).disconnect();
         }
