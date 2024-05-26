@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class ClientApplication {
@@ -19,7 +21,9 @@ public class ClientApplication {
                 try {
                     while (true) {
                         String inMessage = in.readUTF();
-                        System.out.println(inMessage);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm:ss");
+                        String time = simpleDateFormat.format(new Date());
+                        System.out.println(inMessage + " " + time);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

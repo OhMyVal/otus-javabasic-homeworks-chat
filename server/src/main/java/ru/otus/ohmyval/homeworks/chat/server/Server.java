@@ -8,8 +8,10 @@ import java.util.List;
 
 public class Server {
     private int port;
+    private ServerSocket serverSocket;
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
+    private boolean isActive = true;
 
     public AuthenticationService getAuthenticationService() {
         return authenticationService;
@@ -22,10 +24,11 @@ public class Server {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            this.serverSocket = serverSocket;
             this.authenticationService = new InMemoryAuthenticationService();
             System.out.println("Сервис аутентификации запущен: " + authenticationService.getClass().getSimpleName());
             System.out.printf("Сервер запущен на порту: %d, ожидаем подключения клиентов\n", port);
-            while (true) {
+            while (isActive) {
                 try {
                     Socket socket = serverSocket.accept();
                     new ClientHandler(this, socket);
@@ -49,13 +52,15 @@ public class Server {
         }
     }
 
-    public synchronized void kick(String nickname) {
+    public synchronized boolean kick(String deletedNickname) {
         for (ClientHandler c : clients) {
-            if (c.getNickname().equalsIgnoreCase(nickname)) {
+            if (c.getNickname().equalsIgnoreCase(deletedNickname)) {
+                c.sendMessage("Вы удалены из чата");
                 c.disconnect();
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public synchronized void broadcastMessage(String message) {
@@ -68,19 +73,45 @@ public class Server {
         for (ClientHandler c : clients) {
             if (c.getNickname().equalsIgnoreCase(receiverName)) {
                 c.sendMessage(sender.getNickname() + ": " + message);
+                sender.sendMessage(sender.getNickname() + ": " + message);
                 return;
             }
         }
-        System.out.println("Пользователя с таким именем нет");
+        sender.sendMessage("Пользователя с таким именем нет");
     }
 
     public synchronized boolean isNicknameBusy(String nickname) {
         for (ClientHandler c : clients) {
-            if (c.getNickname().equals(nickname)) {
+            if (c.getNickname().equalsIgnoreCase(nickname)) {
                 return true;
             }
         }
         return false;
     }
+
+    public synchronized List<String> activeClients() {
+        List<String> activeClientsList = new ArrayList<>();
+        for (ClientHandler c : clients) {
+            if (c.getSocket() != null && !c.getSocket().isClosed() && c.getIn() != null && c.getOut() != null) {
+                activeClientsList.add(c.getNickname());
+            }
+        }
+        return activeClientsList;
+    }
+
+    public synchronized void shutdown() {
+        isActive = false;
+        for (int i = clients.size() - 1; i >= 0; i--) {
+            clients.get(i).disconnect();
+        }
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }
+
 

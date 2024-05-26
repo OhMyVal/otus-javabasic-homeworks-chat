@@ -12,6 +12,17 @@ public class ClientHandler {
     private DataOutputStream out;
     private String nickname;
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public DataInputStream getIn() {
+        return in;
+    }
+
+    public DataOutputStream getOut() {
+        return out;
+    }
 
     public String getNickname() {
         return nickname;
@@ -38,44 +49,105 @@ public class ClientHandler {
 
     private void communicate() throws IOException {
         while (true) {
+            long time1 = System.currentTimeMillis();
             String msg = in.readUTF();
+            long time2 = System.currentTimeMillis();
+            if ((int) (time2 - time1) / 1000 > 120) {
+                disconnect();
+                break;
+            }
+            if (msg.startsWith("/exit")) {
+                break;
+            }
             if (msg.startsWith("/")) {
-                if (msg.startsWith("/exit")) {
-                    break;
-                }
-                if (msg.startsWith("/w ")) {
-                    String[] parts = msg.split(" ", 3);
-                    if (parts.length != 3) {
-                        sendMessage("Некорректный формат запроса");
-                        continue;
-                    }
-                    String receiverName = parts[1];
-                    String targetMessage = parts[2];
-                    server.sendPrivateMessage(this, receiverName, targetMessage);
-                } else {
-                    if (msg.startsWith("/kick ")) {
-                        String[] parts = msg.split(" ", 2);
-                        if (parts.length != 2) {
-                            sendMessage("Некорректный формат запроса");
-                            continue;
-                        }
-                        if (server.getAuthenticationService().isUserRoleAdmin(this)) {
-                            String deletedNickname = parts[1];
-                            server.kick(deletedNickname);
-                        } else {
-                            sendMessage("Недостаточно прав доступа");
-                        }
-                        continue;
-                    }
-                }
+                serviceCommands(msg);
                 continue;
             }
             server.broadcastMessage(nickname + ": " + msg);
         }
     }
 
+    private void serviceCommands(String msg) {
+        if (msg.startsWith("/w ")) {
+            String[] parts = msg.split(" ", 3);
+            if (parts.length != 3) {
+                sendMessage("Некорректный формат запроса");
+                return;
+            }
+            String receiverName = parts[1];
+            String targetMessage = parts[2];
+            server.sendPrivateMessage(this, receiverName, targetMessage);
+            return;
+        }
+        if (msg.startsWith("/changenick ")) {
+            String[] parts = msg.split(" ", 2);
+            if (parts.length != 2) {
+                sendMessage("Некорректный формат запроса");
+                return;
+            }
+            String newNickname = parts[1];
+            if (server.getAuthenticationService().isNicknameAlreadyExist(newNickname)) {
+                sendMessage("Указанный никнейм уже занят");
+                return;
+            }
+            if (server.getAuthenticationService().changeNickname(this, newNickname)) {
+                server.broadcastMessage(nickname + " изменил никнейм на " + newNickname);
+                this.nickname = newNickname;
+                return;
+            } else {
+                sendMessage("Не удалось сменить никнейм");
+            }
+        }
+        if (msg.startsWith("/activelist")) {
+            sendMessage("Подключенные пользователи: " + server.activeClients());
+            return;
+        }
+        if (server.getAuthenticationService().isUserRoleAdmin(this)) {
+            adminCommands(msg);
+        } else {
+            sendMessage("Недостаточно прав доступа");
+        }
+    }
+
+    private void adminCommands(String msg) {
+        if (msg.startsWith("/shutdown")) {
+            server.shutdown();
+            return;
+        }
+        String[] parts = msg.split(" ", 2);
+        if (parts.length != 2) {
+            sendMessage("Некорректный формат запроса");
+            return;
+        }
+        if (msg.startsWith("/kick ")) {
+            String deletedNickname = parts[1];
+            if (!server.kick(deletedNickname)) {
+                sendMessage("Не удалось удалить пользователя");
+            }
+            return;
+        }
+        if (msg.startsWith("/ban ")) {
+            String banNickname = parts[1];
+            if (server.getAuthenticationService().addToTempBan(banNickname)) {
+                server.kick(banNickname);
+            } else {
+                sendMessage("Не удалось забанить пользователя");
+            }
+        }
+        if (msg.startsWith("/banpermanent ")) {
+            String banNickname = parts[1];
+            if (server.getAuthenticationService().addToPermBan(banNickname)) {
+                server.kick(banNickname);
+            } else {
+                sendMessage("Не удалось забанить пользователя");
+            }
+        }
+    }
+
+
     private boolean tryToAuthenticate() throws IOException {
         while (true) {
+            long time1 = System.currentTimeMillis();
             String msg = in.readUTF();
             if (msg.startsWith("/auth ")) {
                 String[] tokens = msg.split(" ");
@@ -93,6 +165,19 @@ public class ClientHandler {
                 if (server.isNicknameBusy(nickname)) {
                     sendMessage("Указанная учетная запись уже занята. Попробуйте зайти позднее");
                     continue;
+                }
+                if (server.getAuthenticationService().isNicknameInPermBan(nickname)) {
+                    sendMessage("Указанная учетная запись забанена навсегда");
+                    continue;
+                }
+                if (server.getAuthenticationService().isNicknameInTempBan(nickname)) {
+                    long time2 = System.currentTimeMillis();
+                    if ((int) (time2 - time1) / 1000 < 120) {
+                        sendMessage("Указанная учетная запись забанена, повторите попытку позже");
+                        continue;
+                    } else {
+                        server.getAuthenticationService().removeFromTempBan(nickname);
+                    }
                 }
                 this.nickname = nickname;
                 server.subscribe(this);
