@@ -25,6 +25,8 @@ public class DatabaseAuthenticationService implements AuthenticationService {
     private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/chat";
     private static final String USERS_ADD_QUERY = "INSERT * INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
     private static final String USERS_QUERY = "SELECT * FROM users"; // делаем запрос в БД о пользователях (из табл 1)
+    private static final String USERS_ROLE_ADMIN_QUERY = "INSERT * INTO user_role (user_id, role_id) values (?, '1')";
+    private static final String USERS_ROLE_USER_QUERY = "INSERT * INTO user_role (user_id, role_id) values (?, '2')";
     private static final String USER_ROLES_QUERY = "select r.id as id, r.name as name from user_to_role ur left join roles r ON r.id=ur.role_id where ur.user_id = ?";
 
     private List<User> users;
@@ -44,6 +46,17 @@ public class DatabaseAuthenticationService implements AuthenticationService {
                 }
             }
         }
+        try (PreparedStatement ps = connection.prepareStatement(USERS_ROLE_ADMIN_QUERY)) {
+            for (int i = 1; i <= 2; i++) {
+                ps.setInt(1, i);
+            }
+        }
+        try (PreparedStatement ps = connection.prepareStatement(USERS_ROLE_USER_QUERY)) {
+            for (int i = 3; i <= 10; i++) {
+                ps.setInt(1, i);
+            }
+        }
+
         try(Statement statement = connection.createStatement() ) { // создали объект, класса Statement
             try(ResultSet usersResultSet = statement.executeQuery(USERS_QUERY)) { // выполняем запрос - подаем его в аргументы,
                 // записываем в переменную usersResultSet
