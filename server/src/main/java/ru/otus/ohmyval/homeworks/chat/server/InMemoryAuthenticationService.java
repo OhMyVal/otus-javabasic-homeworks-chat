@@ -3,7 +3,7 @@ package ru.otus.ohmyval.homeworks.chat.server;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryAuthenticationService implements AuthenticationService {
+public class InMemoryAuthenticationService  {
     private class User {
         private String login;
         private String password;
@@ -34,7 +34,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
 
     }
 
-    @Override
+
     public String getNicknameByLoginAndPassword(String login, String password) {
         for (User u : users) {
             if (u.login.equals(login) && u.password.equals(password)) {
@@ -44,7 +44,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         return null;
     }
 
-    @Override
+
     public boolean register(String login, String password, String nickname, Role role) {
         if (isLoginAlreadyExist(login)) {
             return false;
@@ -56,7 +56,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         return true;
     }
 
-    @Override
+
     public boolean isLoginAlreadyExist(String login) {
         for (User u : users) {
             if (u.login.equals(login)) {
@@ -66,7 +66,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         return false;
     }
 
-    @Override
+
     public boolean isNicknameAlreadyExist(String nickname) {
         for (User u : users) {
             if (u.nickname.equals(nickname)) {
@@ -76,7 +76,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         return false;
     }
 
-    @Override
+
     public boolean isUserRoleAdmin(ClientHandler clientHandler) {
         String senderNickname = clientHandler.getNickname();
         for (User u : users) {
