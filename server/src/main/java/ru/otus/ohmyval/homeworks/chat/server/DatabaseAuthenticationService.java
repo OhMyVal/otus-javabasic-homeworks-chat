@@ -64,10 +64,10 @@ public class DatabaseAuthenticationService implements AuthenticationService {
 
 
     private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/chat";
-    private static final String USERS_ADD_QUERY = "INSERT * INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
-    private static final String USER_REGISTER_QUERY = "INSERT * INTO users (login, password, nickname) values (?, ?, ?)";
-    private static final String USER_ROLE_ADMIN_QUERY = "INSERT * INTO user_role (user_id, role_id) values (?, '1')";
-    private static final String USER_ROLE_USER_QUERY = "INSERT * INTO user_role (user_id, role_id) values (?, '2')";
+    private static final String USERS_ADD_QUERY = "INSERT INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
+    private static final String USER_REGISTER_QUERY = "INSERT INTO users (login, password, nickname) values (?, ?, ?)";
+    private static final String USER_ROLE_ADMIN_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '1')";
+    private static final String USER_ROLE_USER_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '2')";
     private static final String USER_ROLE_QUERY = "select r.id as id, r.title as title from user_role ur left join roles r ON r.id=ur.role_id where ur.user_id = ?";
 
     private List<User> users;
