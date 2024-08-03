@@ -64,8 +64,10 @@ public class DatabaseAuthenticationService implements AuthenticationService {
 
 
     private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/chat";
-    private static final String USERS_ADD_QUERY = "INSERT INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
+    //    private static final String USERS_ADD_QUERY = "INSERT INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
+    private static final String USERS_ADD_QUERY = "INSERT INTO users (id, login, password, nickname) values (?, ?, ?, ?)";
     private static final String USER_REGISTER_QUERY = "INSERT INTO users (login, password, nickname) values (?, ?, ?)";
+    private static final String USER_QUERY = "SELECT * FROM users where u.login = ?";
     private static final String USER_ROLE_ADMIN_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '1')";
     private static final String USER_ROLE_USER_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '2')";
     private static final String USER_ROLE_QUERY = "select r.id as id, r.title as title from user_role ur left join roles r ON r.id=ur.role_id where ur.user_id = ?";
@@ -87,25 +89,35 @@ public class DatabaseAuthenticationService implements AuthenticationService {
             e.printStackTrace();
         }
     }
+
     private void fillUsers(Connection connection) throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement(USERS_ADD_QUERY)) {
-            for (int i = 1; i <= 10; i++) {
-                ps.setInt(1, i);
-                ps.setInt(2, i);
-                ps.setInt(3, i);
-                try (ResultSet usersResultSet = ps.executeQuery()) {
-                    while (usersResultSet.next()) {
-                        int id = usersResultSet.getInt("id");
-                        String login = usersResultSet.getString("login");
-                        String password = usersResultSet.getString("password");
-                        String nickname = usersResultSet.getString("nickname");
-                        User user = new User(id, login, password, nickname);
-                        users.add(user);
-                    }
-                }
+        for (int i = 1; i <= 10; i++) {
+            User user = new User(i, "login" + i, "pass" + i, "nick" + i);
+            try (PreparedStatement ps = connection.prepareStatement(USERS_ADD_QUERY)) {
+                ps.setInt(1, user.getId());
+                ps.setString(2, user.getLogin());
+                ps.setString(3, user.getPassword());
+                ps.setString(4, user.getNickname());
+//                    ps.execute();
+                users.add(user);
+
+//                ps.setInt(1, i);
+//                ps.setInt(2, i);
+//                ps.setInt(3, i);
+//                try (ResultSet usersResultSet = ps.executeQuery()) {
+//                    while (usersResultSet.next()) {
+//                        int id = usersResultSet.getInt("id");
+//                        String login = usersResultSet.getString("login");
+//                        String password = usersResultSet.getString("password");
+//                        String nickname = usersResultSet.getString("nickname");
+//                        User user = new User(id, login, password, nickname);
+//                        users.add(user);
+//                    }
+//                }
             }
         }
     }
+
     private static void setRoleAdmin(Connection connection) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(USER_ROLE_ADMIN_QUERY)) {
             for (int i = 1; i <= 2; i++) {
@@ -114,6 +126,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
             }
         }
     }
+
     private static void setRoleUser(Connection connection) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(USER_ROLE_USER_QUERY)) {
             for (int i = 3; i <= 10; i++) {
@@ -122,6 +135,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
             }
         }
     }
+
     private void extractUserRoles(Connection connection) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(USER_ROLE_QUERY)) {
             for (User user : users) {
@@ -158,8 +172,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
         try (Connection connection = DriverManager.getConnection(DATABASE_URL, "postgres", "")) {
             addNewUser(login, password, nickname, connection);
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return true;
@@ -170,28 +183,32 @@ public class DatabaseAuthenticationService implements AuthenticationService {
             ps.setString(1, login);
             ps.setString(2, password);
             ps.setString(3, nickname);
-            try (ResultSet usersResultSet = ps.executeQuery()) {
-                int id = usersResultSet.getInt("id");
-                String addedLogin = usersResultSet.getString("login");
-                String addedPassword = usersResultSet.getString("password");
-                String addedNickname = usersResultSet.getString("nickname");
-                User user = new User(id, addedLogin, addedPassword, addedNickname);
-                users.add(user);
-                try (PreparedStatement preparedStatement = connection.prepareStatement(USER_ROLE_USER_QUERY)){
-                    preparedStatement.setInt(1, user.getId());
-                    preparedStatement.execute();
-                }
-                try (PreparedStatement pStatement = connection.prepareStatement(USER_ROLE_QUERY)) {
-                    pStatement.setInt(1, user.getId());
+            try (PreparedStatement preparedStatement = connection.prepareStatement(USER_QUERY)) {
+                preparedStatement.setString(1, login);
+                try (ResultSet usersResultSet = preparedStatement.executeQuery()) {
+                    int id = usersResultSet.getInt("id");
+                    String addedLogin = usersResultSet.getString("login");
+                    String addedPassword = usersResultSet.getString("password");
+                    String addedNickname = usersResultSet.getString("nickname");
+                    User user = new User(id, addedLogin, addedPassword, addedNickname);
+                    users.add(user);
+                    try (PreparedStatement preparedSt = connection.prepareStatement(USER_ROLE_USER_QUERY)) {
+                        preparedSt.setInt(1, user.getId());
+//                    preparedSt.execute();
+                    }
+                    try (PreparedStatement pStatement = connection.prepareStatement(USER_ROLE_QUERY)) {
+                        pStatement.setInt(1, user.getId());
                         try (ResultSet newResultSet = pStatement.executeQuery()) {
-                                int roleId = newResultSet.getInt("id");
-                                String title = newResultSet.getString("title");
-                                user.setRole(new Role(roleId, title));
+                            int roleId = newResultSet.getInt("id");
+                            String title = newResultSet.getString("title");
+                            user.setRole(new Role(roleId, title));
+                        }
                     }
                 }
             }
         }
     }
+
 
     @Override
     public boolean isLoginAlreadyExist(String login) {
