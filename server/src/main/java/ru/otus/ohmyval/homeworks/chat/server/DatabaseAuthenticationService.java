@@ -67,7 +67,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
     //    private static final String USERS_ADD_QUERY = "INSERT INTO users (login, password, nickname) values ('login' + ?, 'pass' + ?, 'nick' + ?)";
     private static final String USERS_ADD_QUERY = "INSERT INTO users (id, login, password, nickname) values (?, ?, ?, ?)";
     private static final String USER_REGISTER_QUERY = "INSERT INTO users (login, password, nickname) values (?, ?, ?)";
-    private static final String USER_QUERY = "SELECT * FROM users where u.login = ?";
+    private static final String USER_QUERY = "SELECT * FROM users where login = ?";
     private static final String USER_ROLE_ADMIN_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '1')";
     private static final String USER_ROLE_USER_QUERY = "INSERT INTO user_role (user_id, role_id) values (?, '2')";
     private static final String USER_ROLE_QUERY = "select r.id as id, r.title as title from user_role ur left join roles r ON r.id=ur.role_id where ur.user_id = ?";
@@ -98,22 +98,8 @@ public class DatabaseAuthenticationService implements AuthenticationService {
                 ps.setString(2, user.getLogin());
                 ps.setString(3, user.getPassword());
                 ps.setString(4, user.getNickname());
-//                    ps.execute();
+                ps.execute();
                 users.add(user);
-
-//                ps.setInt(1, i);
-//                ps.setInt(2, i);
-//                ps.setInt(3, i);
-//                try (ResultSet usersResultSet = ps.executeQuery()) {
-//                    while (usersResultSet.next()) {
-//                        int id = usersResultSet.getInt("id");
-//                        String login = usersResultSet.getString("login");
-//                        String password = usersResultSet.getString("password");
-//                        String nickname = usersResultSet.getString("nickname");
-//                        User user = new User(id, login, password, nickname);
-//                        users.add(user);
-//                    }
-//                }
             }
         }
     }
@@ -183,6 +169,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
             ps.setString(1, login);
             ps.setString(2, password);
             ps.setString(3, nickname);
+            ps.execute();
             try (PreparedStatement preparedStatement = connection.prepareStatement(USER_QUERY)) {
                 preparedStatement.setString(1, login);
                 try (ResultSet usersResultSet = preparedStatement.executeQuery()) {
@@ -194,7 +181,7 @@ public class DatabaseAuthenticationService implements AuthenticationService {
                     users.add(user);
                     try (PreparedStatement preparedSt = connection.prepareStatement(USER_ROLE_USER_QUERY)) {
                         preparedSt.setInt(1, user.getId());
-//                    preparedSt.execute();
+                        preparedSt.execute();
                     }
                     try (PreparedStatement pStatement = connection.prepareStatement(USER_ROLE_QUERY)) {
                         pStatement.setInt(1, user.getId());
